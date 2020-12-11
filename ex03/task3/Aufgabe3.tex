@@ -1,0 +1,136 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[paper=a4paper, left=25mm, right=25mm, top=30mm, bottom=30mm]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\addtolength{\headheight}{11pt}
+\title{\flushleft{\textbf{Problem Sheet I}}}
+\date{}
+\setcounter{secnumdepth}{0}
+
+\newcommand\balancedeq{\stackrel{\mathclap{\tiny\mbox{balanced}}}{=}}
+
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\subsubsection{3.1 LDA Derivation from the Least Squares Error}
+We are looking for the global minimum of
+\begin{equation}
+\Delta: \mathbb{R}^{d+1} \rightarrow \mathbb{R} \quad (\mathbf{m},b) \mapsto \sum_{i=1}^N (\mathbf{w^T x_i} + b - y_i)^2 = \sum_{i=1}^N (\mathbf{x_i^T w} + b - y_i)^2 
+\end{equation}
+First, we take a closer look at the summands. Let $i \in \{1,...,N\}$.\\
+The function def. by $f(x):=x^2$ is in $C^\infty(\mathbb{R})$ with derivative $f'(x) = 2x$. For the function
+\begin{equation}
+g_i: \mathbb{R}^{d+1} \rightarrow \mathbb{R} \quad (\mathbf{m},b) \mapsto \mathbf{w^T x_i} + b - y_i
+\end{equation}
+holds for $k \in {1,...,d}$, $\mathbf{w} \in \mathbb{R}^d, b \in \mathbb{R}$:
+\begin{equation}
+\partial_{w_k} g_i(\mathbf{w}, b) = \partial_{w_k} \left( \sum_{j=1}^d x_{ij} w_j + b - y_i \right) = \sum_{j=1}^d x_{ij} \delta_{jk} = x_{ik}
+\end{equation}
+\begin{equation}
+\partial_b g_i(\mathbf{w}, b) = 1
+\end{equation}
+The partial derivatives are continuous, thus $g_i \ in C^1(\mathbb{R^{d+1}}$
+As a composition/sum of $C^1$ functions, $\Delta$ is a $C^1$ function as well and 
+\begin{align*}
+D\Delta(\mathbf{w},b) = D\left(\sum_{i=1}^N f \circ g_i \right)(\mathbf{w},b) & = \sum_{i=1}^N Df(g_i(\mathbf{w}, b)) \cdot Dg_i(\mathbf{w}, b) \\
+& \sum_{i=1}^N 2g_i(\mathbf{w}, b) \cdot (\nabla_{\mathbf{w}} g_i(\mathbf{w}, b)^T, \partial_b g_i(\mathbf{w},b)) \\
+& \sum_{i=1}^N 2(\mathbf{x_i^Tw} + b - y_i) (\mathbf{x_i^T}, 1)\\
+\end{align*}
+\begin{align*}
+\Rightarrow \nabla_{(\mathbf{w},b)} = 2 \sum_{i=1}^N (\mathbf{x_i^T w}+b-y_i) \left(
+\begin{array}{c}
+\mathbf{x_i^T}\\
+1\\
+\end{array}
+\right) = \left(
+\begin{array}{c}
+2 \sum_{i=1}^N (\mathbf{x_i^T w} + b - y_i)  \mathbf{x_i^T}\\
+2 \sum_{i=1}^N (\mathbf{x_i^T w} + b - y_i)\\
+\end{array}
+\right)
+\end{align*}
+Because $\Delta \in C^1(\mathbb{R}^{d+1})$ and global maxima in an open set are local maxima, it holds for the argmax $(\mathbf{\hat{w}}, \hat{b})$:
+\begin{align*}
+\nabla_{(\mathbf{w}, b)} \Delta(\mathbf{\hat{w}, \hat{b}}) = 0
+\end{align*}
+This implies
+\begin{align*}
+\partial_b \Delta(\mathbf{\hat{w}, \hat{b}}) = 0 & \Rightarrow 0 = \sum_{i=1}^N(\mathbf{x_i^T \hat{w}} + \hat{b} - y_i)\\
+& \Rightarrow 0 = N\hat{b} + \sum_{i=1}^N(\mathbf{x_i^T \hat{w}} - y_i) \\
+& \Rightarrow \hat{b} = \frac{1}{N} \sum_{i=1}^N(-\mathbf{x_i^T \hat{w}} + y_i) = \frac{-1}{N} \sum_{i=1}^N \mathbf{x_i^T \hat{w}} + \sum_{i: y_i=1} 1 - \sum_{i: y_i=-1}^N 1 \quad \balancedeq \quad -\frac{1}{N} \sum_{i=1}^N \mathbf{x_i^T \hat{w}}
+\end{align*}
+Furthermore $\Delta(\mathbf{\hat{w}, \hat{b}}) = 0$ implies
+\begin{align*}
+0 = \sum_{i=1}^N(\mathbf{x_i^T\hat{w}}+\hat{b}-y_i)\mathbf{x_i}
+\end{align*}
+We insert our result for $\hat{b}$ into this equation:
+\begin{align*}
+0 & = \sum_{i=1}^N \left[ \mathbf{x_i^T \hat{w}} - \frac{1}{N} \sum_{j=1}^N \mathbf{x_j^T \hat{w}} - y_i  \right] \mathbf{x_i}\\
+\Rightarrow & \underbrace{\frac{1}{N} \sum_{i=1}^N y_i \mathbf{x_i}}_\text{a)} = \underbrace{-\frac{1}{N} \sum_{i=1}^N \frac{1}{N} \sum_{j=1}^N (\mathbf{x_j^T\hat{w}}) \mathbf{x_i}}_\text{b)} + \underbrace{\frac{1}{N} \sum_{i=1}^N (\mathbf{x_i^T \hat{w}})\mathbf{x_i}}_\text{c)}\\
+\end{align*}
+We will separately discuss the three terms a), b) and c):\\
+\ \\
+\textbf{a)}
+\begin{align*}
+\frac{1}{N} \sum_{i=1}^N y_i \mathbf{x_i} & = \frac{1}{N} \sum_{i:y_i=1}\mathbf{x_i} - \frac{1}{N} \sum_{i:y_i=-1}\mathbf{x_i}\\
+& = \frac{1}{2} \left( \frac{1}{N/2} \sum_{i:y_i=1} \mathbf{x_i} - \frac{1}{N/2} \sum_{i:y_i=-1} \mathbf{x_i} \right)\\
+& \balancedeq \quad \frac{1}{2} \left( \frac{1}{N_1} \sum_{i:y_i=1} \mathbf{x_i} - \frac{1}{N_2} \sum_{i:y_i=-1} \mathbf{x_i} \right)\\
+& = (\mathbf{\mu_1} - \mathbf{\mu_ {-1}})/2\\
+\end{align*}
+\ \\
+\textbf{b)}
+\begin{align*}
+-\frac{1}{N} \sum_{i=1} \frac{1}{N} \sum_{j=1}^N (\mathbf{x_j^T \hat{w}}) \mathbf{x_i} & = \left[ - \frac{1}{N} \sum_{i=1}^N \mathbf{x_i}\right] \left[ \left( \frac{1}{N} \sum_{j=1}^N \mathbf{x_j^T} \right) \mathbf{\hat{w}} \right] \\
+& = -\left[ \left( \frac{1}{N} \sum_{i=1}^N \mathbf{x_i} \right) \left( \frac{1}{N} \sum_{j=1}^N \mathbf{x_j^T} \right) \right] \mathbf{\hat{w}}\\
+& = -\left(  \left[  \left( \frac{1}{N} \sum_{i=1}^N \mathbf{x_i}y_i \right) + \left( \frac{2}{N} \sum_{i:y_i=1} \mathbf{x_i}y_i \right) \right] \left[  \left( \frac{1}{N} \sum_{j=1}^N \mathbf{x_j^T}y_j \right) + \left( \frac{2}{N} \sum_{j:y_j=1} \mathbf{x_j^T}y_j \right) \right] \right)\\
+& = - (\frac{1}{2} (\mathbf{\mu_1} - \mathbf{\mu_{-1}}) + \mathbf{\mu_{-1}}) (\frac{1}{2} (\mathbf{\mu_1} - \mathbf{\mu_{-1}})^T + \mathbf{\mu_{-1}}^T) \mathbf{\hat{w}}\\
+& = - \left[ \frac{1}{4} (\mathbf{\mu_1} - \mathbf{\mu_{-1}})(\mathbf{\mu_1} - \mathbf{\mu_{-1}})^T + (\mathbf{\mu_1} - \mathbf{\mu_{-1}}) \mathbf{\mu_{-1}}^T \right] \mathbf{\hat{w}}\\
+& = - \left[ \frac{S_B}{4} + (\mathbf{\mu_1} - \mathbf{\mu_{-1}}) \mathbf{\mu_{-1}}^T \right] \mathbf{\hat{w}}
+\end{align*}
+\ \\
+\textbf{c)}
+\begin{align*}
+\frac{1}{N} \sum_{i=1}^N (\mathbf{x_i^T \hat{w}}) \mathbf{x_i} &= \frac{1}{N} \sum_{i=1}^N (\mathbf{x_i x_i^T}) \mathbf{\hat{w}}\\
+&= \frac{1}{N} \sum_{i=1}^N (\mathbf{x_i -\mu_{y_i} + \mu_{y_i}}) (\mathbf{x_i -\mu_{y_i} + \mu_{y_i}})^T \mathbf{\hat{w}}\\
+& = \left[ \frac{1}{N} \sum_{i=1}^N (\mathbf{x_i -\mu_{y_i}}) (\mathbf{x_i -\mu_{y_i}})^T + \frac{2}{N} \sum_{i=1}^N (\mathbf{x_i -\mu_{y_i}}) \mathbf{\mu_{y_i}}^T + \frac{1}{N} \sum_{i=1}^N \mathbf{ \mu_{y_i}} \mathbf{\mu_{y_i}}^T \right] \mathbf{\hat{w}}\\
+& = \left[ S_W + \frac{1}{N/2} \sum_{i=1}^N \mathbf{x_i \mu_{y_i}^T} - \frac{2}{N} \sum_{i=1}^N \mathbf{\mu_{y_i} \mu_{y_i}^T} + \frac{1}{N} \sum_{i=1}^N \mathbf{\mu_{y_i} \mu_{y_i}^T} \right]\mathbf{\hat{w}}\\
+& = \left[ S_W + \underbrace{\frac{1}{N/2} \sum_{i:y_i=1} \mathbf{x_i \mu_{y_i}^T}}_{=\mathbf{\mu_1 \mu_{1}^T}} + \underbrace{\frac{1}{N/2} \sum_{i:y_i=-1} \mathbf{x_i \mu_{y_{-1}}^T}}_{=\mathbf{\mu_{-1} \mu_{-1}^T}}  - \mathbf{\mu_1 \mu_1^T} - \mathbf{\mu_{-1} \mu_{-1}^T} + \frac{1}{2}\mathbf{\mu_1 \mu_1^T} + \frac{1}{2} \mathbf{\mu_{-1} \mu_{-1}^T} \right]\mathbf{\hat{w}}\\
+& = \left[ S_W + \frac{1}{2} (\mathbf{\mu_1 - \mu_{-1}})(\mathbf{\mu_1 - \mu_{-1}})^T + (\mathbf{\mu_{1}-\mu_{-1}})\mathbf{\mu_{1}}^T \right] \mathbf{\hat{w}}\\
+& = \left[ S_W + \frac{S_B}{2} + (\mathbf{\mu_{1}-\mu_{-1}})\mathbf{\mu_{1}}^T \right] \mathbf{\hat{w}}\\
+\end{align*}
+Now we insert these results into the equation from last page.
+\begin{align*}
+(\mathbf{\mu_1 - \mu_{-1}})/2 = \left[ - \frac{S_B}{4} - (\mathbf{\mu_{1}-\mu_{-1}})\mathbf{\mu_{1}}^T + S_W + \frac{S_B}{2} + (\mathbf{\mu_{1}-\mu_{-1}})\mathbf{\mu_{1}}^T \right] \mathbf{\hat{w}} = \left[ S_W + \frac{S_B}{4} \right] \mathbf{\hat{w}}
+\end{align*}
+This is equivalent to
+\begin{equation}
+S_W \mathbf{\hat{w}} = \frac{\mathbf{\mu_1 - \mu_{-1}}}{2} + \frac{S_B}{4} \mathbf{\hat{w}}
+\end{equation}
+Because $\mathbb{R}^d$ is a finite dimensional vector space, we can choose $v_2, ...,v_d \in \mathbb{R}^d$ such that $\{(\mu_1-\mu_{-1}),v_2, ..., v_d\}$ is an orthonormal basis of $\mathbb{R}^d$.
+Thus, we can write: $\mathbf{\hat{w}} = \lambda_1 (\mu_1-\mu_{-1}) + \sum_{i=2}^d \lambda_i v_i$ for $\lambda_1, ...,\lambda_d  \in \mathbb{R}$. This way we can show:
+\begin{align*}
+\frac{S_B}{4} \mathbf{\hat{w}} &= \frac{1}{4} (\mu_1-\mu_{-1})(\mu_1-\mu_{-1})^T \left( \lambda_1 (\mu_1-\mu_{-1}) + \sum_{i=2}^d \lambda_i v_i \right)\\
+&= \frac{1}{4} \lambda_1 (\mu_1-\mu_{-1})(\mu_1-\mu_{-1})^T(\mu_1-\mu_{-1})\\ 
+&= \frac{1}{4} \lambda_1 (\mu_1-\mu_{-1})||\mu_1-\mu_{-1}||^2 
+\end{align*}
+The second equality holds because the scalar product of $\mu_1-\mu_{-1}$ and $v_i$ vanishes for all $i \in \{2, ...,d\}$ (ONB). Thus, we obtain with the equality from above and $\tau := \frac{1}{2} + \frac{1}{4}\lambda_1 ||\mu_1-\mu_{-1}||^2$:
+\begin{align*}
+\exists \tau \in \mathbb{R}: S_W\mathbf{\hat{w}} = \tau (\mu_1-\mu_{-1})
+\end{align*}  
+Under the assumption that $S_W$ is invertible (which is true if $(x_i)$ are not located on a common ($d-1$)-dimensional hyperplane) we get:
+\begin{align*}
+\exists \tau \in \mathbb{R}: \mathbf{\hat{w}} = \tau S_W^{-1} (\mu_1-\mu_{-1})
+\end{align*}
+\end{document}
